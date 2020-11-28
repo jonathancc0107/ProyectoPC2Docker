@@ -1,0 +1,35 @@
+version: "3.1"
+services:
+  mysql:
+      container_name: MySql
+      image: mysql:8.0.13
+      command: --default-authentication-plugin=mysql_native_password
+      volumes:
+        - ./mysql-data:/var/lib/mysql
+      ports:
+        - 3306:3306
+      hostname: "Proyecto_G01"
+      environment:
+        MYSQL:DATABASE: 'Proyecto_G01'
+        MYSQL_USER: 'Grupo01'
+        MYSQL_PASSWORD: '123456'
+        MYSQL_ROOT_PASSWORD: 'root'
+  jupyter:
+      container_name: "Jupyter"
+      image: jupyter/scipy-notebook
+      volumes:
+        - './jupyter_data/Python_Scripts:/home/jovyan/work'
+      ports:
+        - 8888:8888
+  dash: 
+      build:
+        context: .
+        dockerfile: Dockerfile.dash
+      container_name: Dash
+      command: ["./wait-for-it.sh", "db:3306", "--", "python", "app.py"]
+      volumes:
+        - './jupyter_data/Python_Scripts:/code'
+      ports:
+        - "8080:8080"
+      depends_on:
+        - mysql
